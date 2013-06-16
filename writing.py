@@ -1,7 +1,7 @@
 
 
 from mutagen.mp3 import MP3
-from mutagen.id3 import ID3, TIT2
+from mutagen.id3 import *
 
 # set any MP3 file from The Nexus here
 audio = ID3("ns20.mp3")
