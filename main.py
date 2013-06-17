@@ -1,42 +1,74 @@
 
 from mutagen.mp3 import MP3
 from mutagen.id3 import *
+from mutagen.id3 import TIT2, TALB, TCOM, TCON, TDRC, TPE1, TPE2, TRCK, APIC
+from datetime import date
+import yaml
 import argparse
 import re
 
-class Meta(object):
-	def __init__(self, formal="", short="", members=["Nexus Team"]):
-		self.formal = formal
-		self.short = short;
-		self.members = members
+def join_and(li):
+	if len(li) <= 2:
+		return ' and '.join(li)
+	else:
+		return ', '.join(li[:-1]) + (' and ' + li[-1])
 
 def parse_file_name(name):
-	parts = name.split(".")
+	parts = name.split('.')
 	string = parts[0]
 	number = re.sub('[^0-9]', '', string)
 	short = re.sub('[0-9]', '', string)
-	return {"name": short, "number": number}
+	return {'name': short, 'number': number}
 
 def find_show(name, shows):
-	for show in shows:
-		# print name , " == " , show.short
-		if name == show.short:
-			return show
-	return shows[-1]
+	for key, show in shows.iteritems():
+		if name == show['short']:
+			return key
+	return 'xx'
 
 def get_arguments():
-	parser = argparse.ArgumentParser(description="Sets episode metadata")
+	parser = argparse.ArgumentParser(description='Sets episode metadata')
 	parser.add_argument('file', type=file)
 	parser.add_argument('title')
-	parser.add_argument("-m", "--members", nargs="*")
+	parser.add_argument('-m', '--members', nargs='*')
 
 	return parser.parse_args()
 
-def set_metadata(file, show, title):
+def set_metadata(file, show, title, members=[]):
 	audio = ID3(file)
-	print title
-	print show
-	print audio.pprint()
+	fn = parse_file_name(file)
+	members = show['members'] + members
+
+	formal_title = show['formal'] + ' #' + fn['number'] + ": " + title 
+	album = show['formal']
+	composer = 'Ryan Rampersad' # make some kind of option for this?
+	genre = 'podcast'
+	year = str(date.today().year)
+	track_artist = join_and(members)
+	album_artist = 'The Nexus TV'
+	track_number = fn['number']
+
+	tit2 = TIT2(encoding=3, text=formal_title)
+	talb = TALB(encoding=3, text=album)
+	tcom = TCOM(encoding=3, text=composer)
+	tcon = TCON(encoding=3, text=genre)
+	tdrc = TDRC(encoding=3, text=year)
+	tpe1 = TPE1(encoding=3, text=track_artist)
+	tpe2 = TPE2(encoding=3, text=album_artist)
+	trck = TRCK(encoding=3, text=track_number)
+
+	elements = [tit2, talb, tcom, tcon, tdrc, tpe1, tpe2, trck]
+	for element in elements:
+		audio.add(element)
+	audio.save()
+
+	print "Done!"
+	# print audio.pprint()
+
+def get_data(file):
+	f = open(file)
+	data = yaml.load(f)
+	return data;
 
 def main():
 	args = get_arguments()
@@ -44,19 +76,18 @@ def main():
 	filename = args.file.name
 	fn = parse_file_name(filename)
 	title = args.title
-	
-	atn = Meta("At The Nexus", "atn", ["Ryan Rampersad", "Matthew Petschl"])
-	eb = Meta("Eight Bit", "eb", ["Ian Buck", "Ian Decker"])
-	cs = Meta("Control Structure", "cs", ["Andrew Bailey", "Christopher Thompson"])
-	ns = Meta("Nexus Special", "ns")
-	tu = Meta("The Universe", "tu", ["Sam Ebertz", "Ryan Ram persad"])
-	tf = Meta("The Fringe", "tf")
-	xx = Meta("Unknown", "xx", ["Literally No One"])
 
-	shows = [atn, eb, cs, ns, tu, tf]
-	show = find_show(fn["name"], shows)
+	# massage the members array; pass in an empty list otherwise
+	members = args.members
+	if args.members is None or len(args.members) <= 0:
+		members = []
 
-	set_metadata(args.file.name, show, title)
+	data = get_data('shows.yaml')
+
+	show_key = find_show(fn['name'], data['shows'])
+	show = data['shows'][show_key]
+
+	set_metadata(args.file.name, show, title, members=members)
 
 
 # ---
