@@ -28,9 +28,11 @@ def find_show(name, shows):
 
 def get_arguments():
 	parser = argparse.ArgumentParser(description='Sets episode metadata')
-	parser.add_argument('file', type=file)
-	parser.add_argument('title')
-	parser.add_argument('-m', '--members', nargs='*')
+	parser.add_argument('file', type=file, help="The episode file to set metadata on")
+	parser.add_argument('title', help="The title of the episode e.g. Show #xx: {title}")
+	parser.add_argument('-m', '--members', nargs='*', help="Additional members to include in the episode")
+	parser.add_argument('-s', '--show', help="Override the auto-determined show name with provided short name (e.g 'atn')")
+	# parser.add_argument('-n', '-number', type=int)
 
 	return parser.parse_args()
 
@@ -62,8 +64,8 @@ def set_metadata(file, show, title, members=[]):
 		audio.add(element)
 	audio.save()
 
-	print "Done!"
-	# print audio.pprint()
+
+
 
 def get_data(file):
 	f = open(file)
@@ -76,19 +78,24 @@ def main():
 	filename = args.file.name
 	fn = parse_file_name(filename)
 	title = args.title
+	data = get_data('shows.yaml')
 
 	# massage the members array; pass in an empty list otherwise
 	members = args.members
 	if args.members is None or len(args.members) <= 0:
 		members = []
 
-	data = get_data('shows.yaml')
+	# massage the show_key variable; override autodetermine by file name
+	show_key = fn['name']
+	if args.show is not None and args.show in data['shows']:
+		show_key = args.show
 
-	show_key = find_show(fn['name'], data['shows'])
+	show_key = find_show(show_key, data['shows'])
 	show = data['shows'][show_key]
 
 	set_metadata(args.file.name, show, title, members=members)
 
+	print "ID3 Metadata saved on " + filename + "."
 
 # ---
 main()
