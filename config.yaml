@@ -1,29 +1,39 @@
+composer: "Ryan Rampersad"
+artist: "The Nexus TV"
+art_path: "album-art/"
 shows:
   atn:
     formal: "At The Nexus"
     short: "atn"
     members: ["Ryan Rampersad", "Matthew Petschl"]
+    album_art: "at-the-nexus-base-001.jpg"
   cs:
     formal: "Control Structure"
     short: "cs"
     members: ["Andrew Bailey", "Christopher Thompson"]
+    album_art: "base-color.png"
   eb:
     formal: "Eight Bit"
     short: "eb"
     members: ["Ian Buck", "Ian Decker"]
+    album_art: "eight-bit-base-001.jpg"
   ns:
     formal: "Nexus Special"
     short: "ns"
     members: ["Ryan Rampersad"]
+    album_art: "nexus-special-base-001.jpg"
   tu:
     formal: "The Universe"
     short: "tu"
     members: ["Sam Ebertz", "Ryan Rampersad"]
+    album_art: "the-universe-001.jpg"
   tf:
     formal: "The Fringe"
     short: "tf"
     members: ["Sam Ebertz", "Ryan Rampersad"]
+    album_art: "the-fringe-base-001.jpg"
   xx:
     formal: "Unknown"
     short: "xx"
     members: ["Literally No One"]
+    album_art: "base-color.png"
