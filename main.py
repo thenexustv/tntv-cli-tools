@@ -1,4 +1,6 @@
 
+from mutagen.mp3 import MP3
+from mutagen.id3 import *
 import argparse
 import re
 
@@ -22,29 +24,40 @@ def find_show(name, shows):
 			return show
 	return shows[-1]
 
-def main():
-	
+def get_arguments():
 	parser = argparse.ArgumentParser(description="Sets episode metadata")
 	parser.add_argument('file', type=file)
 	parser.add_argument('title')
 	parser.add_argument("-m", "--members", nargs="*")
 
-	args = parser.parse_args()
+	return parser.parse_args()
+
+def set_metadata(file, show, title):
+	audio = ID3(file)
+	print title
+	print show
+	print audio.pprint()
+
+def main():
+	args = get_arguments()
 
 	filename = args.file.name
 	fn = parse_file_name(filename)
+	title = args.title
 	
 	atn = Meta("At The Nexus", "atn", ["Ryan Rampersad", "Matthew Petschl"])
 	eb = Meta("Eight Bit", "eb", ["Ian Buck", "Ian Decker"])
 	cs = Meta("Control Structure", "cs", ["Andrew Bailey", "Christopher Thompson"])
 	ns = Meta("Nexus Special", "ns")
-	tu = Meta("The Universe", "tu", ["Sam Ebertz", "Ryan Rampersad"])
+	tu = Meta("The Universe", "tu", ["Sam Ebertz", "Ryan Ram persad"])
 	tf = Meta("The Fringe", "tf")
 	xx = Meta("Unknown", "xx", ["Literally No One"])
 
 	shows = [atn, eb, cs, ns, tu, tf]
+	show = find_show(fn["name"], shows)
 
-	print find_show(fn["name"], shows)
+	set_metadata(args.file.name, show, title)
+
 
 # ---
 main()

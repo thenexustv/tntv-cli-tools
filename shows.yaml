@@ -1,0 +1,29 @@
+shows:
+  atn:
+    formal: "At The Nexus"
+    short: "atn"
+    members: ["Ryan Rampersad", "Matthew Petschl"]
+  cs:
+    formal: "Control Structure"
+    short: "cs"
+    members: ["Andrew Bailey", "Christopher Thompson"]
+  eb:
+    formal: "Eight Bit"
+    short: "eb"
+    members: ["Ian Buck", "Ian Decker"]
+  ns:
+    formal: "Nexus Special"
+    short: "ns"
+    members: ["Ryan Rampersad", "Nexus Team"]
+  tu:
+    formal: "The Universe"
+    short: "tu"
+    members: ["Sam Ebertz", "Ryan Rampersad"]
+  tf:
+    formal: "The Fringe"
+    short: "tf"
+    members: ["Sam Ebertz", "Ryan Rampersad"]
+  xx:
+    formal: "Unknown"
+    short: "xx"
+    members: ["Literally No One"]
