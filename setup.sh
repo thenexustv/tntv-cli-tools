@@ -4,3 +4,4 @@ sudo easy_install pip
 
 sudo pip install mutagen
 sudo pip install PyYaml
+sudo pip install boto
