@@ -43,3 +43,4 @@ Thumbs.db
 *.png
 *.jpg
 album-art/
+config-aws
