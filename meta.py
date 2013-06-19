@@ -41,6 +41,7 @@ def get_arguments():
 	parser.add_argument('-s', '--show', help="Override the auto-determined show name with provided short name (e.g 'atn')")
 	parser.add_argument('-n', '--number', type=int, help="The episode number")
 	parser.add_argument('--quiet', dest='quiet', action='store_true', help="Display no output")
+	parser.add_argument('--meta-data', type=file, help="Override the configuration file for Meta settings")
 
 	return parser.parse_args()
 
@@ -98,7 +99,7 @@ def main():
 
 	output_hook("Reading configuration...")
 
-	data = get_data('config.yaml')
+	data = get_data('config-meta.yaml')
 	data['filename'] = args.file.name;
 	fn = parse_file_name(data['filename'])
 	data['name'] = fn['name']
@@ -119,7 +120,7 @@ def main():
 		data['number'] = args.number
 
 	data['show_key'] = find_show(data['name'], data['shows'])
-	show = data['shows'][data['name']]
+	show = data['shows'][data['show_key']]
 
 	output_hook("Setting metadata for " + get_title(data, show) + "...")
 
