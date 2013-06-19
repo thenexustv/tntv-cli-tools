@@ -98,8 +98,8 @@ def main():
 	else:
 		print "Ready to upload..."
 
-	print("Uploading file " + filename + " to " + remote_filename)
-	k.set_contents_from_filename(filename, cb = percent_cb, num_cb = 100)
+	output_hook("Uploading file " + local_filename + " to ~s3/" + remote_filename)
+	k.set_contents_from_filename(local_filename, cb = percent_cb, num_cb = 100)
 	# this makes input move to the next line
 	if not quiet_output:
 		stdout.write("\n")

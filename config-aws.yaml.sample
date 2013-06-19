@@ -2,4 +2,5 @@ version: 0.1
 aws_key: ""
 aws_secret: ""
 aws_pwd: ""
-aws_bucket: ""
+aws_bucket: "the-nexus-tv"
+aws_path: "podcasts/"
