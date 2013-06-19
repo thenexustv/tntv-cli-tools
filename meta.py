@@ -110,8 +110,8 @@ def main():
 
 	data = get_data(meta_data_path)
 
-	if not os.path.exists(data.art_path):
-		output_hook("Art path %s does not exist" % data.art_path)
+	if not os.path.exists(data['art_path']):
+		output_hook("Art path %s does not exist" % data['art_path'])
 		return;
 
 	data['filename'] = args.file.name;
