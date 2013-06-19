@@ -44,3 +44,4 @@ Thumbs.db
 *.jpg
 album-art/
 config-aws.yaml
+config-meta.yaml

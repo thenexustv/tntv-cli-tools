@@ -1,6 +1,11 @@
 version: 0.1
+
+# provide Amazon Web Services key and secret tokens
 aws_key: ""
 aws_secret: ""
-aws_pwd: ""
+
+# the name of the storage bucket
 aws_bucket: "the-nexus-tv"
+
+# the path storage folder
 aws_path: "podcasts/"
