@@ -99,7 +99,7 @@ def main():
 		print "Ready to upload..."
 
 	output_hook("Uploading file " + local_filename + " to ~s3/" + remote_filename)
-	k.set_contents_from_filename(local_filename, cb = percent_cb, num_cb = 100)
+	k.set_contents_from_filename(local_filename, cb = percent_cb, num_cb = 100, replace = False)
 	# this makes input move to the next line
 	if not quiet_output:
 		stdout.write("\n")

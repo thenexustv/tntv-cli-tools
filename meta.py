@@ -6,6 +6,7 @@ from datetime import date
 import yaml
 import argparse
 import re
+import os
 
 quiet_output = False
 
@@ -63,6 +64,10 @@ def set_metadata(data, show):
 	track_number = str(data['number'])
 	album_art = data["art_path"] + show["album_art"]
 
+	if not os.path.exists(album_art):
+		output_hook("File path %s does not locate a valid album art file." % album_art)
+		return;
+
 	tit2 = TIT2(encoding=3, text=title)
 	talb = TALB(encoding=3, text=album)
 	tcom = TCOM(encoding=3, text=composer)
@@ -99,7 +104,16 @@ def main():
 
 	output_hook("Reading configuration...")
 
-	data = get_data('config-meta.yaml')
+	meta_data_path = 'config-meta.yaml'
+	if args.meta_data is not None:
+		meta_data_path = args.meta_data
+
+	data = get_data(meta_data_path)
+
+	if not os.path.exists(data.art_path):
+		output_hook("Art path %s does not exist" % data.art_path)
+		return;
+
 	data['filename'] = args.file.name;
 	fn = parse_file_name(data['filename'])
 	data['name'] = fn['name']
@@ -126,7 +140,7 @@ def main():
 
 	set_metadata(data, show)
 
-	output_hook("\tID3 metadata saved for " + data['filename'] + ": " + get_title(data, show) + ".")
+	output_hook("  ID3 metadata saved for " + data['filename'] + ": " + get_title(data, show) + ".")
 
 # ---
 main()
