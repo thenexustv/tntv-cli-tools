@@ -79,7 +79,10 @@ def main():
 
 	fn = parse_file_name(local_filename)
 	remote_filename = aws_data['aws_path'] + fn['name'] + "/" + get_filename(local_filename)
-	
+
+	if args.path is not None:
+		remote_filename = args.path
+
 	output_hook("Remote destination is " + remote_filename)
 
 	output_hook("Checking remote destination...")
