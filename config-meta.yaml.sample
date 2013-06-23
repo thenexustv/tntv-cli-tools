@@ -30,7 +30,7 @@ shows:
   tf:
     formal: "The Fringe"
     short: "tf"
-    members: ["Sam Ebertz", "Ryan Rampersad"]
+    members: ["Ryan Rampersad"]
     album_art: "the-fringe-base-001.jpg"
   xx:
     formal: "Unknown"
