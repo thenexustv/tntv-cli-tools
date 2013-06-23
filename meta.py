@@ -1,7 +1,7 @@
 
+import mutagen.id3
 from mutagen.mp3 import MP3
-from mutagen.id3 import *
-from mutagen.id3 import TIT2, TALB, TCOM, TCON, TDRC, TPE1, TPE2, TRCK, APIC, TPUB
+from mutagen.id3 import ID3, TIT2, TALB, TCOM, TCON, TDRC, TPE1, TPE2, TRCK, APIC, TPUB
 from datetime import date
 import yaml
 import argparse
@@ -51,7 +51,10 @@ def get_title(data, show):
 	return title
 
 def set_metadata(data, show):
-	audio = ID3(data['filename'])
+	deleteExistingData = True
+
+	audio = ID3()
+
 	members = show['members'] + data['members']
 
 	title = get_title(data, show)
@@ -84,12 +87,12 @@ def set_metadata(data, show):
 	output_hook("Writing tags...")
 
 	elements = [tit2, talb, tcom, tcon, tdrc, tpe1, tpe2, tpub, trck, apic]
-	audio.delete()
+
 	for element in elements:
 		audio.add(element)
 
 	output_hook("Saving tags...")
-	audio.save()
+	audio.save( data['filename'] )
 
 def get_data(file):
 	f = open(file)
