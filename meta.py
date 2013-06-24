@@ -50,11 +50,7 @@ def get_title(data, show):
 	title = show['formal'] + ' #' + str(data['number']) + ": " + data['title']
 	return title
 
-def set_metadata(data, show):
-	deleteExistingData = True
-
-	audio = ID3()
-
+def write_tags(audio, data, show):
 	members = show['members'] + data['members']
 
 	title = get_title(data, show)
@@ -69,6 +65,7 @@ def set_metadata(data, show):
 
 	if not os.path.exists(album_art):
 		output_hook("File path %s does not locate a valid album art file." % album_art)
+		output_hook("Error!")
 		return;
 
 	tit2 = TIT2(encoding=3, text=title)
@@ -91,6 +88,21 @@ def set_metadata(data, show):
 	for element in elements:
 		audio.add(element)
 
+
+def set_metadata(data, show):
+
+	# load the existing tags or create a new tag container
+	try:
+		audio = ID3( data['filename'] )
+	except mutagen.id3.ID3NoHeaderError:
+		audio = ID3()
+		output_hook("No existing ID3 tags found...")
+		output_hook("Creating frames...")
+
+	# save the tags
+	write_tags(audio, data, show)
+
+	# save the tags
 	output_hook("Saving tags...")
 	audio.save( data['filename'] )
 
