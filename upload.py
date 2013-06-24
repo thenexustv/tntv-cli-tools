@@ -20,7 +20,7 @@ def get_data(file):
 
 def get_arguments():
 	parser = argparse.ArgumentParser(description="Upload an MP3 file to S3")
-	parser.add_argument('file', type=file, help="The MP3 episode file to upload")
+	parser.add_argument('file', type=file, nargs='+', help="The MP3 episode files to upload")
 	parser.add_argument('--quiet', dest='quiet', action='store_true', help="Display no output")
 	parser.add_argument('-p', '--path', help="Override the destination of the MP3 on the S3 server")
 	parser.add_argument('--aws-data', dest="aws_data", help="Override the configuration file for AWS creditials")
@@ -32,7 +32,11 @@ def get_arguments():
 def percent_cb(complete, total):
 	if quiet_output:
 		return # this will skip print this entirely
-	stdout.write( "\r%d%%" % round( ( float(complete) / float(total) ) * 100 ) )
+	percent = round( ( float(complete) / float(total) ) * 100 )
+	progress = int(percent / 5)
+	str_progress = "-" * progress
+	str_spaces = " " * (20 - progress)
+	stdout.write( "\r%d%%   |%s%s|" % (percent, str_progress, str_spaces) )
 	stdout.flush()
 
 # really should make a little helper functions library
@@ -69,9 +73,17 @@ def main():
 	connection = boto.connect_s3(aws_data["aws_key"], aws_data["aws_secret"])
 	bucket = connection.get_bucket(aws_data['aws_bucket'])
 
-	output_hook("Checking file...")
+	# handle multiple files
+	files = args.file
+	for f in files:
+		upload(f, bucket, aws_data = aws_data, meta_data = meta_data, args = args)
 
-	local_filename = args.file.name
+
+
+def upload(file, bucket, aws_data, meta_data, args):
+	output_hook("Checking file %s" % file.name)
+
+	local_filename = file.name
 
 	if not local_filename.lower().endswith('.mp3'):
 		print "There is no MP3 extension on supplied file!\n\n"
@@ -86,7 +98,6 @@ def main():
 	output_hook("Remote destination is " + remote_filename)
 
 	output_hook("Checking remote destination...")
-
 
 	k = Key(bucket)
 	k.key = remote_filename
@@ -110,7 +121,7 @@ def main():
 	output_hook("Marking file " + remote_filename + " as public")
 	k.make_public()
 
-	print "Done!"
+	print "Done!\n\n"
 
 
 # ---

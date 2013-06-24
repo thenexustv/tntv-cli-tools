@@ -43,4 +43,10 @@ There argument required is only a file. There are currently no options.
 
 **Example**: ```python upload.py ../atn81/cleaned/atn81.mp3```
 
+In addition, upload.py can take multiple file arguments. Each file in this argument list will be uploaded in that order.
+
+**Example**: ```python upload.py ../atn81/cleaned/atn81.mp3 ../atn82/tf106.mp3```
+
+In this case ```atn81``` and ```tf106``` will be uploaded to their respective directories.
+
 This will upload the specified MP3 episode to the S3 in the proper location. If a file is already using **atn81.mp3** as its file name, this will alert the user and stop the upload.
