@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 import sys
 from sys import stdout
@@ -11,6 +13,8 @@ from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, TIT2, TALB, TCOM, TCON, TDRC, TPE1, TPE2, TRCK, APIC, TPUB
 from datetime import date
 import os
+import json
+import traceback
 
 def get_configuration(file):
 	f = open(file)
@@ -58,7 +62,12 @@ def get_title(data, show):
 
 def write_tags(audio, config, data, show):
 
-	members = show['members'] + data['members']
+
+	if 'blank_members' in data['args'] and data['args'].blank_members == True:
+		print "\tNotice: --blank-members specified; only using named members"
+		members = data['members']
+	else:
+		members = show['members'] + data['members']
 
 	genre = 'Podcast'
 
@@ -78,7 +87,7 @@ def write_tags(audio, config, data, show):
 		print "\t=== Error ==="
 		sys.exit(-1)
 
-	print "Meta-data:"
+	print "ID3 Metadata:"
 	print "\tTitle: %s" % (title)
 	print "\tGenre: %s" % (genre)
 	print "\tNumber: %s" % (track_number)
@@ -112,8 +121,8 @@ def set_metadata(config, data, show):
 		audio = ID3( data['filename'] )
 	except mutagen.id3.ID3NoHeaderError:
 		audio = ID3()
-		output_hook("No existing ID3 tags found...")
-		output_hook("Creating frames...")
+		print "No existing ID3 tags found..."
+		print "Creating frames..."
 
 	# save the tags
 	write_tags(audio, config, data, show)
@@ -160,8 +169,10 @@ def upload_file(file, bucket, aws_config, meta_config, args):
 	# this makes input move to the next line
 	stdout.write("\n")
 
-	print "Marking remote file (%s) as Public" % (remote_file)
+	print "Marking remote file (%s) as public" % (remote_file)
 	k.make_public()
 
-	print "Completed\n\n"
+	print "Access file: %s" % ( k.generate_url(expires_in = 0, query_auth = False, force_http = True) )
+
+	
 
