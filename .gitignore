@@ -46,4 +46,5 @@ Thumbs.db
 album-art/
 config-aws.yaml
 config-meta.yaml
+config-backup.yaml
 *.pyc
