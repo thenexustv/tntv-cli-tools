@@ -1,0 +1,3 @@
+mutagen>=1.34
+PyYaml>=3.11
+boto>=2.42.0

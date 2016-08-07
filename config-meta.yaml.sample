@@ -6,7 +6,7 @@ shows:
     formal: "At The Nexus"
     short: "atn"
     members: ["Ryan Rampersad", "Matthew Petschl"]
-    album_art: "at-the-nexus-base-001.jpg"
+    album_art: "at-the-nexus-square-002.jpg"
   cs:
     formal: "Control Structure"
     short: "cs"
@@ -32,6 +32,21 @@ shows:
     short: "tf"
     members: ["Ryan Rampersad"]
     album_art: "the-fringe-base-001.jpg"
+  ted:
+    formal: "The Extra Dimension"
+    short: "ted"
+    members: ["Ryan Rampersad"]
+    album_art: "the-extra-dimension-base-002.jpg"
+  pk:
+    formal: "PodKit"
+    short: "pk"
+    members: ["Brandon Johnson", "Brian Mitchell", "Ryan Rampersad"]
+    album_art: "podkit-base-001.png"
+  so:
+    formal: "Second Opinion"
+    short: "so"
+    members: ["Ryan Rampersad"]
+    album_art: "second-opinion-base-001.png"
   xx:
     formal: "Unknown"
     short: "xx"
