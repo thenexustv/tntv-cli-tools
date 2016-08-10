@@ -5,6 +5,8 @@ import argparse
 import traceback
 import boto
 import boto.s3
+from boto.s3.bucket import Bucket
+import boto3
 
 
 def main_meta(args):
@@ -66,17 +68,19 @@ def main_upload(args):
     meta_config = get_configuration(meta_config_path)
 
     print("Connecting to Amazon S3 (%s)" % aws_config['aws_bucket'])
-
-    connection = boto.connect_s3(aws_config["aws_key"], aws_config["aws_secret"])
-    bucket = connection.get_bucket(aws_config['aws_bucket'])
-
-    print("Connected to Amazon S3 (%s)" % aws_config['aws_bucket'])
+    # This is no longer the recommended way to connect with AWS
+    # See here: https://boto3.readthedocs.io/en/stable/guide/configuration.html
+    s3 = boto3.client(
+        's3',
+        aws_access_key_id=aws_config["aws_key"],
+        aws_secret_access_key=aws_config["aws_secret"]
+    )
 
     count = 0
     files = args.file
     for f in files:
         try:
-            upload_file(f, bucket, aws_config=aws_config, meta_config=meta_config, args=args)
+            upload_file(f, s3, aws_config=aws_config, meta_config=meta_config, args=args)
             count += 1
             print("\n\tUpload %d of %d completed!\n" % (count, len(files)))
         except:

@@ -9,6 +9,31 @@ import mutagen.id3
 from mutagen.id3 import ID3, TIT2, TALB, TCOM, TCON, TDRC, TPE1, TPE2, TRCK, APIC, TPUB
 from datetime import date
 import os
+import boto3
+import botocore
+import sys
+import threading
+
+
+# From http://boto3.readthedocs.io/en/stable/guide/s3.html
+class ProgressPercentage(object):
+    def __init__(self, filename):
+        self._filename = filename
+        self._size = float(os.path.getsize(filename))
+        self._seen_so_far = 0
+        self._lock = threading.Lock()
+
+    def __call__(self, bytes_amount):
+        # To simplify we'll assume this is hooked up
+        # to a single filename.
+        with self._lock:
+            self._seen_so_far += bytes_amount
+            percentage = (self._seen_so_far / self._size) * 100
+            sys.stdout.write(
+                "\r%s  %s / %s  (%.2f%%)" % (
+                    self._filename, self._seen_so_far, self._size,
+                    percentage))
+            sys.stdout.flush()
 
 
 def get_configuration(file):
@@ -60,6 +85,19 @@ def percent_cb(complete, total):
 def get_title(data, show):
     title = "%s #%d: %s" % (show['formal'], int(data['number']), data['title'])
     return title
+
+
+# http://stackoverflow.com/a/33843019/3928053
+def key_exists(s3, bucket, key):
+    try:
+        s3.head_object(Bucket=bucket, Key=key)
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            return False
+        else:
+            raise e
+    else:
+        return True
 
 
 def write_tags(audio, config, data, show):
@@ -133,7 +171,7 @@ def set_metadata(config, data, show):
     audio.save(data['filename'])
 
 
-def upload_file(file, bucket, aws_config, meta_config, args):
+def upload_file(file, s3, aws_config, meta_config, args):
     print("Verifying local file %s" % file.name)
 
     if not file.name.lower().endswith('.mp3'):
@@ -147,31 +185,31 @@ def upload_file(file, bucket, aws_config, meta_config, args):
         return
 
     fn = parse_file_name(file.name)
-    remote_file = "%s%s/%s" % (aws_config['aws_path'], fn['name'], get_filename_from_path(file.name))
+    key = "%s%s/%s" % (aws_config['aws_path'], fn['name'], get_filename_from_path(file.name))
 
-    # refers to upload path
-    # if args.path is not None:
-    #     remote_file = args.path
+    print("Verifying remote file %s" % key)
 
-    print("Verifying remote file %s" % remote_file)
-
-    k = Key(bucket)
-    k.key = remote_file
-
-    if k.exists():
-        print("The remote file (%s) already exists" % remote_file)
+    if key_exists(s3=s3, bucket=aws_config['aws_bucket'], key=key):
+        print("The remote file (%s) already exists" % key)
         print("Please use the Amazon S3 web explorer to handle conflict")
         print("\t=== Error ===")
         return
-    
-    print("Ready to upload %s (local) to %s (remote)" % (file.name, remote_file))
-    
-    k.set_contents_from_filename(file.name, cb=percent_cb, num_cb=100, replace=False)
-    
-    # this makes input move to the next line
-    stdout.write("\n")
 
-    print("Marking remote file (%s) as public" % remote_file)
-    k.make_public()
+    print("Uploading %s (local) to %s (remote)" % (file.name, key))
 
-    print("Access file: %s" % k.generate_url(expires_in=0, query_auth=False, force_http=True))
+    s3.upload_file(file.name, aws_config['aws_bucket'], key, Callback=ProgressPercentage(file.name))
+    print()
+
+    print("Adding 'public-read' ACL to remote file (%s)" % key)
+
+    s3.put_object_acl(
+        Bucket=aws_config['aws_bucket'],
+        Key=key,
+        ACL='public-read'
+    )
+
+    # This seems hacky, boto3 doesn't seem to have a good way to do this yet
+    url = '{}/{}/{}'.format(s3.meta.endpoint_url, aws_config['aws_bucket'], key)
+    http_url = url.replace('https', 'http')
+
+    print("Access file: %s" % http_url)
