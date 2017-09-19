@@ -209,7 +209,8 @@ def upload_file(file, s3, aws_config, meta_config, args):
     )
 
     # This seems hacky, boto3 doesn't seem to have a good way to do this yet
-    url = '{}/{}/{}'.format(s3.meta.endpoint_url, aws_config['aws_bucket'], key)
-    http_url = url.replace('https', 'http')
+    url = '{aws}/{key}'.format(aws=s3.meta.endpoint_url,
+                               key=key)
+    http_url = url.replace('https://', 'http://'+aws_config['aws_bucket']+'.')    
 
     print("Access file: %s" % http_url)
