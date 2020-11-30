@@ -46,7 +46,7 @@ def join_and(li):
     if len(li) <= 2:
         return ' and '.join(li)
     else:
-        return ', '.join(li[:-1]) + (' and ' + li[-1])
+        return ', '.join(li[:-1]) + (', and ' + li[-1])
 
 
 def parse_file_name(name):
