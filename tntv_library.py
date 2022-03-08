@@ -38,7 +38,7 @@ class ProgressPercentage(object):
 
 def get_configuration(file):
     f = open(file)
-    data = yaml.load(f)
+    data = yaml.safe_load(f)
     return data
 
 
@@ -113,7 +113,7 @@ def write_tags(audio, config, data, show):
     title = get_title(data, show)
     album = show['formal']
     composer = config['composer']
-    
+
     year = str(date.today().year)
 
     track_artist = join_and(members)
@@ -185,7 +185,8 @@ def upload_file(file, s3, aws_config, meta_config, args):
         return
 
     fn = parse_file_name(file.name)
-    key = "%s%s/%s" % (aws_config['aws_path'], fn['name'], get_filename_from_path(file.name))
+    key = "%s%s/%s" % (aws_config['aws_path'],
+                       fn['name'], get_filename_from_path(file.name))
 
     print("Verifying remote file %s" % key)
 
@@ -197,7 +198,8 @@ def upload_file(file, s3, aws_config, meta_config, args):
 
     print("Uploading %s (local) to %s (remote)" % (file.name, key))
 
-    s3.upload_file(file.name, aws_config['aws_bucket'], key, Callback=ProgressPercentage(file.name))
+    s3.upload_file(
+        file.name, aws_config['aws_bucket'], key, Callback=ProgressPercentage(file.name))
     print()
 
     print("Adding 'public-read' ACL to remote file (%s)" % key)
@@ -211,6 +213,6 @@ def upload_file(file, s3, aws_config, meta_config, args):
     # This seems hacky, boto3 doesn't seem to have a good way to do this yet
     url = '{aws}/{key}'.format(aws=s3.meta.endpoint_url,
                                key=key)
-    http_url = url.replace('https://', 'http://'+aws_config['aws_bucket']+'.')    
+    http_url = url.replace('https://', 'http://'+aws_config['aws_bucket']+'.')
 
     print("Access file: %s" % http_url)
