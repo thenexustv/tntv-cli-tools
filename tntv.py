@@ -2,10 +2,6 @@
 
 from tntv_library import *
 import argparse
-import traceback
-import boto
-import boto.s3
-from boto.s3.bucket import Bucket
 import boto3
 
 
@@ -93,102 +89,6 @@ def main_upload(args):
             print("\n Upload %d of %d failed!\n" % (count, len(files)))
 
 
-def main_backup(args):
-
-    print("\t |=== Backup ===|\n")
-
-    meta_config_path = "config-meta.yaml"
-    aws_config_path = "config-aws.yaml"
-    backup_config_path = "config-backup.yaml"
-
-    if args.aws_config is not None:
-        aws_config_path = args.aws_config
-    if args.meta_config is not None:
-        meta_config_path = args.meta_config
-
-    aws_config = get_configuration(aws_config_path)
-    meta_config = get_configuration(meta_config_path)
-    backup_config = get_configuration(backup_config_path)
-
-    print("Connecting to Amazon S3 (%s)" % aws_config["aws_bucket"])
-
-    connection = boto.connect_s3(aws_config["aws_key"], aws_config["aws_secret"])
-    bucket = connection.get_bucket(aws_config["aws_bucket"])
-
-    print("Connected to Amazon S3 (%s)" % aws_config["aws_bucket"])
-
-    data_store = backup_config["data_store"]
-
-    runtime = {"downloaded": 0, "skipped": 0, "folders": 0}
-
-    try:
-        with open(data_store, "r") as f:
-            data = yaml.load(f)
-    except IOError:
-        print("Data-store (%s) not available, creating new file" % data_store)
-        data = {"files": {}, "refresh": 0}
-
-    for key in bucket.list(prefix=backup_config["remote_path"]):
-        # if ZSTOP > ZSTOP_X: break;
-        # else: ZSTOP += 1
-        try:
-
-            if key.name.endswith("/") and key.size == 0:
-                print(("Handling remote folder: %s" % key.name))
-                runtime["folders"] += 1
-                continue
-
-            if key.name in data["files"]:
-                runtime["skipped"] += 1
-                continue
-
-            print("Handling remote file: %s" % key.name)
-
-            destination = "%s/%s" % (backup_config["local_path"], key.name)
-            parts = destination.split("/")
-            folder = "/".join(parts[:-1])
-
-            try:
-                os.makedirs(folder)
-            except OSError:
-                if os.path.exists(folder):
-                    pass
-                else:
-                    print("Could not create folder structure")
-                    raise
-
-            key.get_contents_to_filename(destination, cb=percent_cb, num_cb=100)
-            stdout.write("\n")
-
-            checksum = key.etag[1:-1]
-            if len(checksum) > 32:
-                checksum = checksum[:-2]
-
-            data["files"][key.name] = {"size": key.size, "checksum": checksum}
-            runtime["downloaded"] += 1
-
-        except:
-            print("%s failed" % key.name)
-            print(traceback.format_exc())
-
-    data["refresh"] += 1
-
-    print("Updating data-store (%s) ..." % data_store)
-
-    with open(data_store, "w") as f:
-        f.write(yaml.safe_dump(data, default_flow_style=False))
-
-    print(
-        "\n\tDownloaded %d | Folders %d | Skipped %d | Refreshed %d\n"
-        % (
-            runtime["downloaded"],
-            runtime["folders"],
-            runtime["skipped"],
-            data["refresh"],
-        )
-    )
-
-
 def main():
 
     parser = argparse.ArgumentParser(prog="tntv")
@@ -258,25 +158,6 @@ def main():
         help="Manually set the meta-data configuration file",
     )
     parser_upload.set_defaults(func=main_upload)
-
-    parser_backup = subparsers.add_parser(
-        "backup",
-        description="Handle automated backup of remote S3 files",
-        help="Backup files from S3",
-    )
-    parser_backup.add_argument(
-        "--aws-config",
-        type=argparse.FileType("r"),
-        dest="aws_config",
-        help="Manually set the AWS configuration file",
-    )
-    parser_backup.add_argument(
-        "--meta-config",
-        type=argparse.FileType("r"),
-        dest="meta_config",
-        help="Manually set the meta-data configuration file",
-    )
-    parser_backup.set_defaults(func=main_backup)
 
     args = parser.parse_args()
     args.func(args)

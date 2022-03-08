@@ -2,14 +2,12 @@
 
 import sys
 from sys import stdout
-from boto.s3.key import Key
 import yaml
 import re
 import mutagen.id3
 from mutagen.id3 import ID3, TIT2, TALB, TCOM, TCON, TDRC, TPE1, TPE2, TRCK, APIC, TPUB
 from datetime import date
 import os
-import boto3
 import botocore
 import sys
 import threading

@@ -70,7 +70,3 @@ In this case `atn110` and `tf191` will be uploaded to their respective directori
 - Local file is not marked as an MP3
 - Local file has no file size
 - The remote file already exists
-
-### Backup
-
-Documentation coming soon...
