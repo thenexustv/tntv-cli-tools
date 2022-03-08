@@ -1,8 +1,0 @@
-# remote folder
-remote_path: "podcasts/"
-
-# local backup folder
-local_path: "../backup/"
-
-# local data-store of saved files, checksums and sizes
-data_store: "backup.dat.yaml"
