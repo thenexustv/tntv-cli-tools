@@ -30,9 +30,9 @@ class ProgressPercentage(object):
             self._seen_so_far += bytes_amount
             percentage = (self._seen_so_far / self._size) * 100
             sys.stdout.write(
-                "\r%s  %s / %s  (%.2f%%)" % (
-                    self._filename, self._seen_so_far, self._size,
-                    percentage))
+                "\r%s  %s / %s  (%.2f%%)"
+                % (self._filename, self._seen_so_far, self._size, percentage)
+            )
             sys.stdout.flush()
 
 
@@ -44,32 +44,32 @@ def get_configuration(file):
 
 def join_and(li):
     if len(li) <= 2:
-        return ' and '.join(li)
+        return " and ".join(li)
     else:
-        return ', '.join(li[:-1]) + (', and ' + li[-1])
+        return ", ".join(li[:-1]) + (", and " + li[-1])
 
 
 def parse_file_name(name):
-    filename = name.split('/')
-    parts = filename[-1].split('.')
+    filename = name.split("/")
+    parts = filename[-1].split(".")
     string = parts[0]
-    number = re.sub('[^0-9]', '', string)
-    short = re.sub('[0-9]', '', string)
-    return {'name': short, 'number': number}
+    number = re.sub("[^0-9]", "", string)
+    short = re.sub("[0-9]", "", string)
+    return {"name": short, "number": number}
 
 
 def get_filename_from_path(filename):
     # assume the filename is a path
     # this ensures that it is actually a name
-    parts = filename.split('/')
+    parts = filename.split("/")
     return parts[-1]
 
 
 def find_show_from_dictionary(name, shows):
     for key, show in shows.items():
-        if name == show['short']:
+        if name == show["short"]:
             return key
-    return 'xx'
+    return "xx"
 
 
 # Hey look, in line file upload progress!
@@ -83,7 +83,7 @@ def percent_cb(complete, total):
 
 
 def get_title(data, show):
-    title = "%s #%d: %s" % (show['formal'], int(data['number']), data['title'])
+    title = "%s #%d: %s" % (show["formal"], int(data["number"]), data["title"])
     return title
 
 
@@ -92,7 +92,7 @@ def key_exists(s3, bucket, key):
     try:
         s3.head_object(Bucket=bucket, Key=key)
     except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == "404":
+        if e.response["Error"]["Code"] == "404":
             return False
         else:
             raise e
@@ -102,24 +102,24 @@ def key_exists(s3, bucket, key):
 
 def write_tags(audio, config, data, show):
 
-    if 'blank_members' in data['args'] and data['args'].blank_members:
+    if "blank_members" in data["args"] and data["args"].blank_members:
         print("\tNotice: --blank-members specified; only using named members")
-        members = data['members']
+        members = data["members"]
     else:
-        members = show['members'] + data['members']
+        members = show["members"] + data["members"]
 
-    genre = 'Podcast'
+    genre = "Podcast"
 
     title = get_title(data, show)
-    album = show['formal']
-    composer = config['composer']
+    album = show["formal"]
+    composer = config["composer"]
 
     year = str(date.today().year)
 
     track_artist = join_and(members)
-    album_artist = config['artist']
-    track_number = str(data['number'])
-    album_art = config['art_path'] + show['album_art']
+    album_artist = config["artist"]
+    track_number = str(data["number"])
+    album_art = config["art_path"] + show["album_art"]
 
     if not os.path.exists(album_art):
         print("File path %s does not locate a valid album art file." % album_art)
@@ -142,8 +142,8 @@ def write_tags(audio, config, data, show):
     trck = TRCK(encoding=3, text=track_number)
     tpub = TPUB(encoding=3, text=album_artist)
 
-    image = open(album_art, 'rb').read()
-    apic = APIC(3, 'image/jpg', 3, 'Front cover', image)
+    image = open(album_art, "rb").read()
+    apic = APIC(3, "image/jpg", 3, "Front cover", image)
 
     print("Writing tags...")
 
@@ -157,7 +157,7 @@ def set_metadata(config, data, show):
 
     # load the existing tags or create a new tag container
     try:
-        audio = ID3(data['filename'])
+        audio = ID3(data["filename"])
     except mutagen.id3.ID3NoHeaderError:
         audio = ID3()
         print("No existing ID3 tags found...")
@@ -168,13 +168,13 @@ def set_metadata(config, data, show):
 
     # save the tags
     print("Attempting to save tags...")
-    audio.save(data['filename'])
+    audio.save(data["filename"])
 
 
 def upload_file(file, s3, aws_config, meta_config, args):
     print("Verifying local file %s" % file.name)
 
-    if not file.name.lower().endswith('.mp3'):
+    if not file.name.lower().endswith(".mp3"):
         print("The file (%s) does not have the MP3 extension")
         print("\t=== Error ===")
         return
@@ -185,12 +185,15 @@ def upload_file(file, s3, aws_config, meta_config, args):
         return
 
     fn = parse_file_name(file.name)
-    key = "%s%s/%s" % (aws_config['aws_path'],
-                       fn['name'], get_filename_from_path(file.name))
+    key = "%s%s/%s" % (
+        aws_config["aws_path"],
+        fn["name"],
+        get_filename_from_path(file.name),
+    )
 
     print("Verifying remote file %s" % key)
 
-    if key_exists(s3=s3, bucket=aws_config['aws_bucket'], key=key):
+    if key_exists(s3=s3, bucket=aws_config["aws_bucket"], key=key):
         print("The remote file (%s) already exists" % key)
         print("Please use the Amazon S3 web explorer to handle conflict")
         print("\t=== Error ===")
@@ -199,20 +202,16 @@ def upload_file(file, s3, aws_config, meta_config, args):
     print("Uploading %s (local) to %s (remote)" % (file.name, key))
 
     s3.upload_file(
-        file.name, aws_config['aws_bucket'], key, Callback=ProgressPercentage(file.name))
+        file.name, aws_config["aws_bucket"], key, Callback=ProgressPercentage(file.name)
+    )
     print()
 
     print("Adding 'public-read' ACL to remote file (%s)" % key)
 
-    s3.put_object_acl(
-        Bucket=aws_config['aws_bucket'],
-        Key=key,
-        ACL='public-read'
-    )
+    s3.put_object_acl(Bucket=aws_config["aws_bucket"], Key=key, ACL="public-read")
 
     # This seems hacky, boto3 doesn't seem to have a good way to do this yet
-    url = '{aws}/{key}'.format(aws=s3.meta.endpoint_url,
-                               key=key)
-    http_url = url.replace('https://', 'http://'+aws_config['aws_bucket']+'.')
+    url = "{aws}/{key}".format(aws=s3.meta.endpoint_url, key=key)
+    http_url = url.replace("https://", "http://" + aws_config["aws_bucket"] + ".")
 
     print("Access file: %s" % http_url)

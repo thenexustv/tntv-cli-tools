@@ -1,4 +1,4 @@
-# tntv-cli-tools [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org)
+# tntv-cli-tools [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 This is a terminal package for helping the producers of The Nexus be productive.
 
@@ -10,15 +10,25 @@ This package contains Python tools for
 
 This was updated to use Python 3 and thus will not work with Python 2.x. Try a recent version of Python 3.
 
+## Setup
+
+Install dependencies.
+
+```shell
+pip3 install -r requirements.txt
+```
+
+Rename and update the configuration files, removing the `.sample` from the filenames.
+
+### Format the Code
+
+This project uses https://github.com/psf/black for formatting. It's installed with the other requirements, and can be run with `black .` at the root of the repository.
+
 ## Tools
 
 All functionality is wrapped in the executable `tntv.py` Python file.
 
 The two primary commands are `tntv.py meta` and `tntv.py upload`.
-
-## How To
-
-`pip3 install -r requirements.txt` should install required Python libraries
 
 ### Meta
 
